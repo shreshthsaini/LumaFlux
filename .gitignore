@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+runs/
+eval_results/
+data/curated/
+data/synthetic/
+trackio/
+logs/
+*.safetensors
+.DS_Store

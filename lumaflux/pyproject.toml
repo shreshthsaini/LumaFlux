@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lumaflux"
+version = "0.1.0"
+description = "LumaFlux: Lifting 8-Bit Worlds to HDR Reality with Physically-Guided Diffusion Transformers"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Shreshth Saini", email = "saini.2@utexas.edu" },
+]
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.1",
+  "torchvision",
+  "diffusers>=0.31",
+  "transformers>=4.44",
+  "accelerate>=0.34",
+  "datasets>=2.20",
+  "safetensors>=0.4",
+  "huggingface_hub>=0.24",
+  "trackio",
+  "einops",
+  "numpy",
+  "pyyaml",
+  "imageio",
+  "pillow",
+  "opencv-python-headless",
+  "scikit-image",
+  "lpips",
+  "tqdm",
+]
+
+[project.optional-dependencies]
+demo = ["gradio>=4.0", "matplotlib"]
+dev = ["pytest", "pytest-xdist", "ruff"]
+
+[project.scripts]
+lumaflux-train = "lumaflux.training.train:main"
+lumaflux-infer = "lumaflux.inference.cli:main"
+lumaflux-eval = "lumaflux.evaluation.benchmark:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]

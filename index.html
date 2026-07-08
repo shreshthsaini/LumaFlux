@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LumaFlux: Lifting 8-Bit Worlds to HDR Reality</title>
+  <meta name="description" content="LumaFlux: a physically and perceptually guided diffusion transformer for SDR-to-HDR inverse tone mapping, built on a frozen Flux backbone.">
+  <meta property="og:title" content="LumaFlux: Lifting 8-Bit Worlds to HDR Reality with Physically-Guided Diffusion Transformers">
+  <meta property="og:description" content="Prompt-free SDR→HDR (PQ/BT.2020) conversion by adapting a frozen Flux MM-DiT with PGA, PCM, an HDR Residual Coupler, and an RQS tone-field decoder.">
+  <meta property="og:image" content="static/figures/fig1_teaser.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-soft: rgba(37, 99, 235, 0.07);
+      --bg: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---------- hero ---------- */
+    .hero { padding: 84px 0 44px; text-align: center; }
+    .kicker {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 500;
+      line-height: 1.14;
+      letter-spacing: -0.6px;
+      color: var(--text-primary);
+      max-width: 820px;
+      margin: 0 auto 20px;
+    }
+    .authors { font-size: 16px; color: var(--text-primary); margin-bottom: 6px; }
+    .authors a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border); }
+    .authors a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+    .authors sup, .affil sup { color: var(--text-muted); font-size: 11px; }
+    .affil { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: var(--bg);
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.primary { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+    .btn.primary:hover { background: #1e293b; color: #fff; }
+
+    /* thin luminance hairline: the one visual nod to HDR */
+    .lumaline {
+      height: 3px;
+      border-radius: 2px;
+      margin: 44px auto 0;
+      max-width: 420px;
+      background: linear-gradient(90deg, #cbd5e1 0%, #93b4f0 35%, #f3cd7e 75%, #fdf3dd 100%);
+    }
+
+    /* ---------- sections ---------- */
+    section { padding: 44px 0 4px; }
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    h2 {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 30px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+    p.lead { max-width: 820px; margin-bottom: 18px; }
+    .figure { margin: 24px 0; }
+    .figure img {
+      width: 100%;
+      display: block;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .figure .cap {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding-top: 10px;
+      line-height: 1.55;
+    }
+    .facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 28px;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      padding: 14px 8px;
+      margin: 26px 0 6px;
+    }
+    .facts b { color: var(--text-primary); font-weight: 600; }
+
+    /* ---------- module list ---------- */
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0 40px;
+      margin: 22px 0 6px;
+    }
+    .module {
+      padding: 16px 0;
+      border-top: 1px solid var(--border-light);
+    }
+    .module h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .module h3 span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-right: 8px;
+    }
+    .module p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ---------- tables ---------- */
+    .tbl-wrap { overflow-x: auto; margin: 22px 0 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 640px; }
+    th {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: center;
+      padding: 9px 12px;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+      font-size: 13px;
+    }
+    td {
+      text-align: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-secondary);
+    }
+    td:first-child, th:first-child { text-align: left; }
+    td:first-child { color: var(--text-primary); font-weight: 500; }
+    tr.ours td { background: var(--accent-soft); }
+    .best { color: var(--accent); font-weight: 700; }
+    .tbl-note { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    /* ---------- bibtex ---------- */
+    pre {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin: 18px 0;
+    }
+    footer {
+      margin-top: 56px;
+      padding: 26px 0 40px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+    footer a { color: var(--text-secondary); }
+    footer a:hover { color: var(--accent); }
+    @media (max-width: 700px) {
+      .hero { padding-top: 56px; }
+      section { padding-top: 34px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="kicker">SDRTV → HDRTV · Inverse Tone Mapping</div>
+      <h1>LumaFlux: Lifting 8-Bit Worlds to HDR Reality with Physically-Guided Diffusion Transformers</h1>
+      <p class="authors">
+        <a href="https://shreshthsaini.github.io/">Shreshth Saini</a><sup>1</sup> ·
+        Hakan Gedik<sup>1</sup> ·
+        Neil Birkbeck<sup>2</sup> ·
+        Yilin Wang<sup>2</sup> ·
+        Balu Adsumilli<sup>2</sup> ·
+        Alan C. Bovik<sup>1</sup>
+      </p>
+      <p class="affil"><sup>1</sup> The University of Texas at Austin &nbsp;·&nbsp; <sup>2</sup> Google, Inc.</p>
+      <div class="btn-row">
+        <a class="btn primary" href="https://arxiv.org/abs/2604.02787">Paper</a>
+        <a class="btn" href="https://github.com/shreshthsaini/LumaFlux">Code</a>
+        <a class="btn" href="blogs/lumaflux.html">Blog Post</a>
+      </div>
+      <div class="lumaline" title="100 nits → 1000 nits"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section id="teaser">
+      <div class="figure">
+        <img src="static/figures/fig1_teaser.jpg" alt="SDR inputs and LumaFlux HDR outputs from the Luma-Eval benchmark">
+        <p class="cap"><strong>SDR → HDR with LumaFlux.</strong> Examples from the Luma-Eval benchmark: each pair shows
+        a real-world low-quality SDR input and the LumaFlux reconstruction, which restores a substantially broader dynamic
+        range and the color saturation lost during tone-mapping compression — recovering both diffuse texture and specular highlight detail.</p>
+      </div>
+    </section>
+
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p class="lead">
+        The rapid adoption of HDR-capable devices has created a pressing need to convert 8-bit Standard Dynamic Range
+        content into perceptually and physically accurate 10-bit HDR. Existing inverse tone-mapping (ITM) methods often rely on
+        fixed tone-mapping operators that struggle to generalize to real-world degradations, stylistic variations, and camera
+        pipelines — producing clipped highlights, desaturated colors, or unstable tone reproduction.
+      </p>
+      <p class="lead">
+        <strong>LumaFlux</strong> is the first physically and perceptually guided diffusion
+        transformer for SDR→HDR reconstruction, built by adapting a large pretrained DiT without retraining its weights. It introduces
+        (1) a <strong>Physically-Guided Adaptation</strong> module injecting luminance, spatial, and frequency
+        cues into attention through gated low-rank residuals; (2) a <strong>Perceptual Cross-Modulation</strong>
+        layer stabilizing chroma and texture via FiLM conditioning on SigLIP features; (3) an
+        <strong>HDR Residual Coupler</strong> fusing both signals under a timestep- and layer-adaptive schedule;
+        and (4) a <strong>Rational-Quadratic Spline decoder</strong> reconstructing smooth, interpretable tone fields
+        for highlight and exposure expansion. We further curate the first large-scale SDR–HDR training corpus and establish
+        <strong>Luma-Eval</strong>, a new evaluation benchmark with HDR references and expert-graded SDR.
+      </p>
+      <div class="facts">
+        <span><b>+1.6 dB</b> PSNR over strongest baseline</span>
+        <span><b>318k</b> curated SDR–HDR pairs</span>
+        <span><b>≈2 days</b> to train on 4× H200</span>
+        <span><b>prompt-free</b> — no text encoders</span>
+      </div>
+    </section>
+
+    <section id="method">
+      <h2>Method</h2>
+      <p class="lead">
+        SDR formation is a lossy chain — tone mapping, BT.2020→709 gamut compression, quantization, and codec noise.
+        Inverting it needs both <em>physical priors</em> (luminance and color constraints) and <em>perceptual priors</em>
+        (semantics and realism). LumaFlux gets the latter for free from a frozen Flux backbone and injects the former
+        through four lightweight, zero-initialized modules scheduled by a shared timestep–layer conditioner Ψ(t, ℓ):
+        early layers and timesteps receive strong global tone gains, late ones refine highlight detail.
+      </p>
+      <div class="modules">
+        <div class="module">
+          <h3><span>PGA</span>Physically-Guided Adaptation</h3>
+          <p>Gated low-rank residuals on attention value projections, conditioned per-token and per-head on luminance,
+          gradient, and saturation maps with FFT spectral gating — expanding highlights only where the scene demands it.</p>
+        </div>
+        <div class="module">
+          <h3><span>PCM</span>Perceptual Cross-Modulation</h3>
+          <p>FiLM modulation of hidden states from frozen SigLIP embeddings, enforcing color constancy and semantic
+          coherence across illumination and content variations.</p>
+        </div>
+        <div class="module">
+          <h3><span>Coupler</span>HDR Residual Coupler</h3>
+          <p>Fuses physical and perceptual token residuals with a λ(t, ℓ) gate that decays as t→0: global tone first,
+          fine highlight roll-off last — a guidance flow inside the latent manifold.</p>
+        </div>
+        <div class="module">
+          <h3><span>RQS</span>Rational-Quadratic Spline Decoder</h3>
+          <p>A monotone, invertible, differentiable tone field that expands VAE-decoded luma into HDR with smooth
+          highlight knees — no banding, no saturation collapse.</p>
+        </div>
+      </div>
+      <div class="figure">
+        <img src="static/figures/fig3_overview.png" alt="LumaFlux architecture overview">
+        <p class="cap"><strong>Architecture.</strong> The SDR input splits into physical (T<sub>phys</sub>) and perceptual
+        (T<sub>perc</sub>) streams. In each Luma-MMDiT block, PGA injects luminance- and spectrum-aware low-rank updates into
+        attention, PCM applies FiLM to normalized features, and the HDR Residual Coupler fuses both cues. A frozen VAE decoder
+        with the RQS tone-field head reconstructs HDR in PQ/BT.2020.</p>
+      </div>
+      <div class="figure">
+        <img src="static/figures/fig2_paradigms.png" alt="Baseline DiT fine-tuning vs LumaFlux adaptation">
+        <p class="cap"><strong>Architectural paradigms.</strong> Left: direct LoRA/full fine-tuning of a DiT overfits small HDR
+        datasets and hallucinates texture. Right: LumaFlux inserts lightweight, physically interpretable modules into the frozen
+        MM-DiT, preserving the pretrained generative prior while enabling accurate ITM with few trainable parameters.</p>
+      </div>
+    </section>
+
+    <section id="dataset">
+      <h2>Dataset &amp; Benchmark</h2>
+      <p class="lead">
+        We unify HIDROVQA (411 PGC videos), CHUG (428 UGC videos), and LIVE-TMHDR (40 studio HDR videos with expert-graded SDR)
+        under PQ-encoded BT.2020 at a 1,000-nit mastering peak. Each HDR frame is paired with SDR variants from a composite
+        degradation chain: 8 tone-mapping operators × CRF {23, 31, 39} compression — ≈318k pairs including 54k expert-graded
+        references. <strong>Luma-Eval</strong> adds 20 held-out HDR sources (10 PGC + 10 UGC) evaluated
+        under both perceptually optimized and degradation-heavy SDR conditions.
+      </p>
+    </section>
+
+    <section id="results">
+      <h2>Results</h2>
+      <p class="lead">Metrics in PU21 space for luminance (PSNR, SSIM), HDR domain (HDR-VDP3), and perceptual color (ΔE<sub>ITP</sub>, lower is better). Best in <span class="best">blue</span>.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th colspan="4">HDRTV1K</th>
+              <th colspan="4">HDRTV4K</th>
+              <th colspan="4">Luma-Eval</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>PSNR↑</th><th>SSIM↑</th><th>VDP3↑</th><th>ΔE↓</th>
+              <th>PSNR↑</th><th>SSIM↑</th><th>VDP3↑</th><th>ΔE↓</th>
+              <th>PSNR↑</th><th>SSIM↑</th><th>VDP3↑</th><th>ΔE↓</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>HDRTVNet++</td><td>38.36</td><td>0.973</td><td>8.75</td><td>8.28</td><td>30.82</td><td>0.881</td><td>8.12</td><td>7.85</td><td>36.54</td><td>0.901</td><td>8.22</td><td>7.35</td></tr>
+            <tr><td>ICTCPNet</td><td>36.59</td><td>0.922</td><td>8.57</td><td>7.79</td><td>33.12</td><td>0.977</td><td>8.90</td><td>6.75</td><td>34.45</td><td>0.919</td><td>8.74</td><td>6.93</td></tr>
+            <tr><td>HDRTVDM</td><td>36.98</td><td>0.971</td><td>8.55</td><td>10.84</td><td>30.15</td><td>0.886</td><td>7.90</td><td>9.95</td><td>35.10</td><td>0.903</td><td>8.24</td><td>9.44</td></tr>
+            <tr><td>HDCFM</td><td>38.42</td><td>0.973</td><td>8.52</td><td>7.83</td><td>33.25</td><td>0.908</td><td>8.20</td><td>7.42</td><td>36.78</td><td>0.915</td><td>8.29</td><td>7.20</td></tr>
+            <tr><td>Deep SR-ITM</td><td>37.10</td><td>0.969</td><td>8.23</td><td>9.24</td><td>26.59</td><td>0.812</td><td>6.92</td><td>8.88</td><td>33.21</td><td>0.875</td><td>7.41</td><td>8.41</td></tr>
+            <tr><td>FlashVSR</td><td>35.34</td><td>0.883</td><td>6.31</td><td>8.79</td><td>33.51</td><td>0.846</td><td>5.72</td><td>7.51</td><td>34.80</td><td>0.857</td><td>5.84</td><td>6.23</td></tr>
+            <tr><td>LEDiff</td><td>36.52</td><td>0.872</td><td>5.71</td><td>9.13</td><td>32.25</td><td>0.863</td><td>5.32</td><td>9.66</td><td>31.73</td><td>0.859</td><td>5.12</td><td>9.85</td></tr>
+            <tr><td>PromptIR</td><td>32.14</td><td>0.954</td><td>9.17</td><td>9.59</td><td>28.48</td><td>0.898</td><td>9.17</td><td>7.00</td><td>34.12</td><td>0.913</td><td>8.88</td><td>6.82</td></tr>
+            <tr class="ours"><td><strong>LumaFlux (ours)</strong></td>
+              <td class="best">39.27</td><td class="best">0.982</td><td class="best">9.83</td><td class="best">6.12</td>
+              <td class="best">35.86</td><td class="best">0.978</td><td class="best">9.72</td><td class="best">5.86</td>
+              <td class="best">36.92</td><td class="best">0.938</td><td class="best">8.91</td><td class="best">5.67</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tbl-note">Quantitative comparison across benchmarks (Table 1 of the paper).</p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Variant (ablation, 100k iters)</th><th>PSNR↑</th><th>PSNR(Y)↑</th><th>ΔE<sub>ITP</sub>↓</th><th>HDR-VDP3↑</th><th>HDR-LPIPS↓</th><th>FR-HIDROVQA↑</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Flux + LoRA only</td><td>33.42</td><td>34.28</td><td>8.58</td><td>7.82</td><td>0.136</td><td>72.9</td></tr>
+            <tr><td>+ PGA (no spectral)</td><td>34.94</td><td>35.81</td><td>7.62</td><td>8.18</td><td>0.122</td><td>75.2</td></tr>
+            <tr><td>+ PGA (spectral gating)</td><td>35.18</td><td>36.02</td><td>7.31</td><td>8.29</td><td>0.116</td><td>76.3</td></tr>
+            <tr><td>+ PCM (SigLIP FiLM)</td><td>35.89</td><td>36.73</td><td>6.78</td><td>8.46</td><td>0.107</td><td>78.6</td></tr>
+            <tr><td>+ RQS (linear)</td><td>35.72</td><td>36.54</td><td>6.85</td><td>8.41</td><td>0.108</td><td>78.0</td></tr>
+            <tr class="ours"><td><strong>+ RQS (monotone spline)</strong></td><td class="best">35.98</td><td class="best">36.84</td><td class="best">6.09</td><td class="best">8.61</td><td class="best">0.087</td><td class="best">80.8</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tbl-note">Component ablations on Luma-Eval (Table 3 of the paper): PGA delivers the largest gain; the monotone RQS restores perceptual smoothness and broadens effective dynamic range.</p>
+    </section>
+
+    <section id="bibtex">
+      <h2>BibTeX</h2>
+      <pre>@article{saini2026lumaflux,
+  title   = {LumaFlux: Lifting 8-Bit Worlds to HDR Reality with
+             Physically-Guided Diffusion Transformers},
+  author  = {Saini, Shreshth and Gedik, Hakan and Birkbeck, Neil and
+             Wang, Yilin and Adsumilli, Balu and Bovik, Alan C.},
+  journal = {arXiv preprint arXiv:2604.02787},
+  year    = {2026}
+}</pre>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>LumaFlux · The University of Texas at Austin &amp; Google, Inc. ·
+        <a href="https://github.com/shreshthsaini/LumaFlux">github.com/shreshthsaini/LumaFlux</a> ·
+        <a href="blogs/lumaflux.html">read the blog post</a></p>
+    </div>
+  </footer>
+</body>
+</html>
