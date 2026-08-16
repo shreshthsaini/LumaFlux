@@ -1,0 +1,60 @@
+# Example source layout. Update each path to match locally obtained media.
+out_dir: data/curated
+peak_nits: 1000.0
+workers: null
+shard_bytes: 1000000000
+tmos:
+  - ocio_filmic
+  - bt2446c_gm
+  - hard_clip_gm
+  - bt2446a
+  - reinhard
+  - youtube_logc
+  - bt2390_eetf_gm
+  - gamma_clip
+crf_levels: [23, 31, 39]
+seed: 0
+sources:
+  - name: chug
+    source_dataset: CHUG
+    path: data/raw/chug
+    category: ugc
+    format: pq2020
+    fps: 1
+    reference_csv: data/metadata/chug.csv
+    reference_hash_column: Video
+    reference_filter_column: ref
+    reference_filter_value: "1"
+    holdout_count: 10
+    holdout_seed: 260402787
+
+  - name: live_tmhdr
+    source_dataset: LIVE-TMHDR
+    path: data/raw/live-tmhdr/reference
+    category: pgc
+    format: pq2020
+    fps: 10
+    expert_fps: 60
+    expert_sdr_path: data/raw/live-tmhdr/expert-sdr
+    frame_offset: 1
+    holdout_count: 10
+    holdout_seed: 260402787
+    enabled: true
+
+  - name: sol_levante
+    source_dataset: Netflix Open Content
+    path: data/raw/sol-levante
+    category: pgc
+    format: pq2020
+    fps: 1
+    holdout_count: 0
+    enabled: true
+
+  - name: hdrtv1k
+    source_dataset: HDRTV1K
+    mode: native_pairs
+    path: data/raw/hdrtv1k/train-hdr
+    sdr_path: data/raw/hdrtv1k/train-sdr
+    category: pgc
+    format: pq2020
+    enabled: true

@@ -1,16 +1,47 @@
+# Python
 __pycache__/
 *.py[cod]
+*.so
 *.egg-info/
 .eggs/
 build/
 dist/
+.venv/
+
+# Test and tool caches
 .pytest_cache/
 .ruff_cache/
-runs/
-eval_results/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local configuration
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+
+# Data, model files, and generated outputs
+data/raw/
 data/curated/
-data/synthetic/
+data/hdrtv1k/
+weights/
+checkpoints/
+runs/
+results/
+eval_results/
 trackio/
 logs/
 *.safetensors
-.DS_Store
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# Media generated during preparation or inference
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.y4m

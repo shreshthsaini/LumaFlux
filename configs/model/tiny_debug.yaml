@@ -1,0 +1,40 @@
+# Offline debug configuration: randomly-initialized miniature stack with the
+# same structure as the real model. Runs on CPU; used by tests and CI.
+model:
+  backbone: tiny
+  siglip: tiny
+  dtype: fp32
+  gradient_checkpointing: false
+  rank: 4
+  bottleneck: 16
+  num_knots: 8
+  phys_channels: 8
+  stats_dim: 8
+  num_bands: 4
+  num_null_tokens: 4
+  modulation_hidden: 32
+  guidance_scale: 1.0
+  peak_nits: 1000.0
+
+train:
+  max_steps: 20
+  batch_size: 2
+  grad_accum: 1
+  lr: 1.0e-3
+  betas: [0.9, 0.999]
+  weight_decay: 0.0
+  warmup_steps: 2
+  crop_size: 64
+  bridge_noise: 0.05
+  recon_every: 2
+  w_velocity: 1.0
+  lambda1: 1.0
+  lambda2: 0.5
+  lambda3: 0.1
+  max_grad_norm: 1.0
+  mixed_precision: "no"
+  num_workers: 0
+  log_every: 5
+  ckpt_every: 10
+  trackio_project: lumaflux-debug
+  seed: 0

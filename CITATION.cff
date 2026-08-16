@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+title: "LumaFlux: Lifting 8-Bit Worlds to HDR Reality with Physically-Guided Diffusion Transformers"
+message: "If you use this software or the released adapter weights, please cite the paper."
+type: software
+authors:
+  - family-names: Saini
+    given-names: Shreshth
+    affiliation: The University of Texas at Austin
+  - family-names: Gedik
+    given-names: Hakan
+    affiliation: The University of Texas at Austin
+  - family-names: Birkbeck
+    given-names: Neil
+    affiliation: Google, Inc.
+  - family-names: Wang
+    given-names: Yilin
+    affiliation: Google, Inc.
+  - family-names: Adsumilli
+    given-names: Balu
+    affiliation: Google, Inc.
+  - family-names: Bovik
+    given-names: Alan C.
+    affiliation: The University of Texas at Austin
+repository-code: "https://github.com/shreshthsaini/LumaFlux"
+url: "https://shreshthsaini.github.io/LumaFlux/"
+license: Apache-2.0
+keywords:
+  - inverse tone mapping
+  - high dynamic range
+  - diffusion transformer
+  - video restoration
+preferred-citation:
+  type: article
+  title: "LumaFlux: Lifting 8-Bit Worlds to HDR Reality with Physically-Guided Diffusion Transformers"
+  authors:
+    - family-names: Saini
+      given-names: Shreshth
+    - family-names: Gedik
+      given-names: Hakan
+    - family-names: Birkbeck
+      given-names: Neil
+    - family-names: Wang
+      given-names: Yilin
+    - family-names: Adsumilli
+      given-names: Balu
+    - family-names: Bovik
+      given-names: Alan C.
+  journal: "arXiv preprint arXiv:2604.02787"
+  year: 2026
+  url: "https://arxiv.org/abs/2604.02787"
