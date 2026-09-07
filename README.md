@@ -151,10 +151,6 @@ point is available as `python -m lumaflux.inference.cli` with an explicit
 Roughly 5.3 s and 27 GB of GPU memory per 1080p frame at the default 8 steps. Raising
 the step count costs proportionally more without improving quality.
 
-## Demo Space
-
-`space/` holds a Gradio app: upload an SDR image, get the BT.2446c preview, the 16-bit PQ/BT.2020 PNG, and the predicted tone curve. Host your own copy with `python space/deploy.py` from a logged-in account that has accepted the FLUX.1-dev license (Gradio Spaces need a Hugging Face PRO plan, which also unlocks ZeroGPU). The script uploads the app, stores your token as the `HF_TOKEN` secret, and requests ZeroGPU.
-
 ## Data, training, and evaluation
 
 | Guide | Contents |

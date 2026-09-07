@@ -1,8 +1,0 @@
-git+https://github.com/shreshthsaini/LumaFlux.git
-diffusers>=0.35
-transformers>=4.44
-accelerate
-safetensors
-sentencepiece
-protobuf
-matplotlib
