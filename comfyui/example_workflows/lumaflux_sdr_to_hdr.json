@@ -1,0 +1,112 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [60, 120],
+      "size": [320, 320],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1]},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["example.png", "image"]
+    },
+    {
+      "id": 2,
+      "type": "LumaFluxLoader",
+      "pos": [60, 500],
+      "size": [420, 190],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "LUMAFLUX_MODEL", "type": "LUMAFLUX_MODEL", "links": [2]}
+      ],
+      "properties": {"Node name for S&R": "LumaFluxLoader"},
+      "widgets_values": [
+        "lumaflux-main.safetensors",
+        "black-forest-labs/FLUX.1-dev (Hugging Face, gated)",
+        "black-forest-labs/FLUX.1-dev (Hugging Face, gated)",
+        "google/siglip-so400m-patch14-384",
+        "bf16"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LumaFluxSDRToHDR",
+      "pos": [560, 240],
+      "size": [400, 240],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "LUMAFLUX_MODEL", "link": 2},
+        {"name": "image", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "hdr_pq", "type": "IMAGE", "links": [3, 5]},
+        {"name": "preview", "type": "IMAGE", "links": [4]}
+      ],
+      "properties": {"Node name for S&R": "LumaFluxSDRToHDR"},
+      "widgets_values": [8, 0, "fixed", true, 0.8, 1.0]
+    },
+    {
+      "id": 4,
+      "type": "LumaFluxSaveHDRPNG",
+      "pos": [1040, 120],
+      "size": [340, 120],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [{"name": "hdr_pq", "type": "IMAGE", "link": 3}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "LumaFluxSaveHDRPNG"},
+      "widgets_values": ["lumaflux/hdr"]
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [1040, 300],
+      "size": [340, 300],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [{"name": "images", "type": "IMAGE", "link": 4}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "PreviewImage"},
+      "widgets_values": []
+    },
+    {
+      "id": 6,
+      "type": "LumaFluxSaveHDRVideo",
+      "pos": [1040, 660],
+      "size": [340, 160],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [{"name": "hdr_pq", "type": "IMAGE", "link": 5}],
+      "outputs": [],
+      "properties": {"Node name for S&R": "LumaFluxSaveHDRVideo"},
+      "widgets_values": ["lumaflux/hdr", 24.0, 16]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 1, "IMAGE"],
+    [2, 2, 0, 3, 0, "LUMAFLUX_MODEL"],
+    [3, 3, 0, 4, 0, "IMAGE"],
+    [4, 3, 1, 5, 0, "IMAGE"],
+    [5, 3, 0, 6, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {"note": "The video save node is bypassed (mode 4). Feed a frame batch (for example from Load Video) and enable it for HEVC output."},
+  "version": 0.4
+}

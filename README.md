@@ -13,7 +13,7 @@
   &nbsp;·&nbsp;
   <a href="https://shreshthsaini.github.io/LumaFlux/blogs/lumaflux.html">Blog</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/shreshthsaini/ComfyUI-LumaFlux">ComfyUI</a>
+  <a href="comfyui/README.md">ComfyUI</a>
 </p>
 
 <p align="center">
@@ -155,11 +155,19 @@ the step count costs proportionally more without improving quality.
 
 ## ComfyUI
 
-[ComfyUI-LumaFlux](https://github.com/shreshthsaini/ComfyUI-LumaFlux) wraps this pipeline
-as nodes: a loader that takes the FLUX.1-dev checkpoints already in your ComfyUI model
-folders (or the gated diffusers repo) plus the released adapters, a converter that runs
-the same 8-step transport with shared noise and tone-curve smoothing across a frame
-batch, an SDR preview, and save nodes for 16-bit PQ PNG and 10-bit HEVC HDR video.
+The repository doubles as a ComfyUI custom node pack: clone it into
+`ComfyUI/custom_nodes`, install `requirements.txt`, and five nodes appear under the
+`LumaFlux` category. The loader takes the FLUX.1-dev checkpoints already in your
+ComfyUI model folders (or the gated diffusers repo) plus the released adapters; the
+converter runs the same 8-step transport with shared noise and tone-curve smoothing
+across a frame batch; save nodes write 16-bit PQ PNG and 10-bit HEVC HDR video.
+Details in [`comfyui/README.md`](comfyui/README.md).
+
+```bash
+cd ComfyUI/custom_nodes
+git clone https://github.com/shreshthsaini/LumaFlux
+pip install -r LumaFlux/requirements.txt
+```
 
 ## Data, training, and evaluation
 
@@ -189,6 +197,7 @@ src/lumaflux/      color science, data curation, models, training, inference, ev
 scripts/           prepare_data · train · infer · benchmark · export_adapters
 configs/           model, training, and data-source configurations
 docs/              data, training, and evaluation guides
+comfyui/           ComfyUI nodes (the repository root is the node pack)
 tests/             offline CPU tests
 index.html         project page (GitHub Pages)
 ```

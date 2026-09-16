@@ -48,6 +48,13 @@ lumaflux-eval = "lumaflux.evaluation.benchmark:main"
 Homepage = "https://github.com/shreshthsaini/LumaFlux"
 Paper = "https://arxiv.org/abs/2604.02787"
 Weights = "https://huggingface.co/shreshthsaini/LumaFlux"
+ComfyUI = "https://github.com/shreshthsaini/LumaFlux/tree/master/comfyui"
+
+# Comfy Registry metadata: the repository doubles as a ComfyUI custom node pack.
+[tool.comfy]
+PublisherId = "shreshthsaini"
+DisplayName = "LumaFlux"
+Icon = ""
 
 [tool.setuptools]
 package-dir = {"" = "src"}

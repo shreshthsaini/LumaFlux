@@ -1,0 +1,11 @@
+# Inference-only dependencies. ComfyUI-Manager installs these when the repository
+# is cloned into custom_nodes; the nodes import the package from src/ directly.
+# For the CLI, training, and evaluation use `pip install -e .` instead.
+torch>=2.1
+diffusers>=0.32,<1.0
+transformers>=4.44
+safetensors>=0.4
+huggingface_hub>=0.24
+pyyaml
+numpy
+imageio
