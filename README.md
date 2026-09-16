@@ -12,6 +12,8 @@
   <a href="https://shreshthsaini.github.io/LumaFlux/">Project page</a>
   &nbsp;·&nbsp;
   <a href="https://shreshthsaini.github.io/LumaFlux/blogs/lumaflux.html">Blog</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/shreshthsaini/ComfyUI-LumaFlux">ComfyUI</a>
 </p>
 
 <p align="center">
@@ -150,6 +152,14 @@ point is available as `python -m lumaflux.inference.cli` with an explicit
 
 Roughly 5.3 s and 27 GB of GPU memory per 1080p frame at the default 8 steps. Raising
 the step count costs proportionally more without improving quality.
+
+## ComfyUI
+
+[ComfyUI-LumaFlux](https://github.com/shreshthsaini/ComfyUI-LumaFlux) wraps this pipeline
+as nodes: a loader that takes the FLUX.1-dev checkpoints already in your ComfyUI model
+folders (or the gated diffusers repo) plus the released adapters, a converter that runs
+the same 8-step transport with shared noise and tone-curve smoothing across a frame
+batch, an SDR preview, and save nodes for 16-bit PQ PNG and 10-bit HEVC HDR video.
 
 ## Data, training, and evaluation
 
